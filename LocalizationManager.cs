@@ -11,9 +11,9 @@ namespace YLocalization
         /// <summary>
         /// Cached ResourceManagers for each ResourceSet supported requested.       
         /// </summary>
-        internal readonly List<ResourceManager> ResourceManagers = new List<ResourceManager>();
+        private readonly List<ResourceManager> _resourceManagers = new List<ResourceManager>();
 
-        private CultureInfo culture;
+        private CultureInfo _culture;
         public void AddAssembly(string assemblyName, string resourcePath = "Resources.LocalizableResources")
         {
             var assembly = Assembly.Load(new AssemblyName(assemblyName));
@@ -24,12 +24,12 @@ namespace YLocalization
 
         public CultureInfo Culture
         {
-            get => culture;
+            get => _culture;
             set
             {
-                if (!Equals(culture, value))
+                if (!Equals(_culture, value))
                 {
-                    culture = value;
+                    _culture = value;
                     CultureChanged?.Invoke(this, EventArgs.Empty);
                 }
 
@@ -43,25 +43,19 @@ namespace YLocalization
 
         public string GetString(string key, params object[] parameters)
         {
-            foreach (var resourceManager in ResourceManagers)
+            foreach (var resourceManager in _resourceManagers)
             {
                 var str = GetString(resourceManager, key, Culture, parameters);
-                if (!string.IsNullOrEmpty(str))
-                {
-                    return str;
-                }
+                if (!string.IsNullOrEmpty(str)) return str;
             }
             return $"?{key}?";
         }
 
         private static string GetString(ResourceManager manager, string stringName, CultureInfo cultureInfo, params object[] parameters)
         {
-            if (manager == null)
-            {
-                return null;
-            }
+            if (manager == null) return null;
             string str;
-            string unFormattedString = string.Empty;
+            var unFormattedString = string.Empty;
             try
             {
                 unFormattedString = manager.GetString(stringName, cultureInfo) ?? String.Empty;
@@ -85,16 +79,13 @@ namespace YLocalization
 
         public void AddResourceManager(ResourceManager resourceManager)
         {
-            if (resourceManager != null)
-            {
-                ResourceManagers.Add(resourceManager);
-            }
+            if (resourceManager != null) _resourceManagers.Add(resourceManager);
         }
 
         public void AddAssembly(Assembly assembly, string resourcePath = "Resources.LocalizableResources")
         {
             var resName = GetDefaultResourceName(assembly.ManifestModule.Name, resourcePath);
-            ResourceManagers.Add(new ResourceManager(resName, assembly));
+            _resourceManagers.Add(new ResourceManager(resName, assembly));
         }
         private static string GetDefaultResourceName(string assemblyModuleName, string resourcePath)
         {

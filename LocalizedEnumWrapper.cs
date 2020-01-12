@@ -34,26 +34,16 @@ namespace YLocalization
             return result;
         }
 
-        protected bool Equals(LocalizedEnumWrapper<T> other)
+        private bool Equals(LocalizedEnumWrapper<T> other)
         {
             return EqualityComparer<T>.Default.Equals(Value, other.Value);
         }
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-            if (obj.GetType() != GetType())
-            {
-                return false;
-            }
-            return Equals((LocalizedEnumWrapper<T>)obj);
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == GetType() && Equals((LocalizedEnumWrapper<T>)obj);
         }
 
         public override int GetHashCode()
@@ -70,6 +60,7 @@ namespace YLocalization
         {
             return !Equals(left, right);
         }
+
         public static string EnumToResourceKey(T enumValue)
         {
             var enumType = enumValue.GetType();
